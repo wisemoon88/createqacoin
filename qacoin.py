@@ -6,13 +6,13 @@
 # requests==2.18.4: pip install requests==2.18.4
 
 # Importing the libraries
-import datetime
-import hashlib
-import json
-from flask import Flask, jsonify, request
+import datetime #used for timestamping the block
+import hashlib #this is used in the sha256 encryption
+import json #used to create and utilize json files
+from flask import Flask, jsonify, request #flask is a web app, jsonify is to jsonify something? requests is to use requests library
 import requests
-from uuid import uuid4
-from urllib.parse import urlparse
+from uuid import uuid4 #this creates a address for the node port
+from urllib.parse import urlparse #this parses the full address to only get the node without the http
 
 # Part 1 - Building a Blockchain
 
