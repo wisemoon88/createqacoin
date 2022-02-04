@@ -34,7 +34,7 @@ class Blockchain: # this is creating the blockchain class.  a class can be used 
         self.chain.append(block) # block variable created will be appended to the chain list.
         return block
 
-    def get_previous_block(self): #method to get the previous block which returns the block of the previous chain in the list
+    def get_previous_block(self): #method to get the previous block which returns the block of the last block in the list of the chain
         return self.chain[-1]
 
     def proof_of_work(self, previous_proof): #method to perform proof of work which needs to solve a formula prior to approval for creating block
@@ -42,78 +42,78 @@ class Blockchain: # this is creating the blockchain class.  a class can be used 
         check_proof = False #initialize
         while check_proof is False: # while loop to keep iterating while proof is not satisfied
             hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest() #sha256 is method in hashlib library to perform sha256 encryption on the equation used as proof of work.encode adds a 'b' and hexdigest converts the value to hexadecimal
-            if hash_operation[:4] == '0000':
+            if hash_operation[:4] == '0000': # check variable if generated hexadecimal has 4 leading zeros.  if true exit while loop if not add 1 to new proof and keep iterating
                 check_proof = True
             else:
                 new_proof += 1
-        return new_proof
+        return new_proof # returns new proof as proof of work
     
-    def hash(self, block):
+    def hash(self, block): #hash method which returns the sha256 hash of the argument block
         encoded_block = json.dumps(block, sort_keys = True).encode()
-        return hashlib.sha256(encoded_block).hexdigest()
+        return hashlib.sha256(encoded_block).hexdigest() #returns the sha256 hash of the argument block
     
-    def is_chain_valid(self, chain):
-        previous_block = chain[0]
-        block_index = 1
-        while block_index < len(chain):
-            block = chain[block_index]
-            if block['previous_hash'] != self.hash(previous_block):
-                return False
+    def is_chain_valid(self, chain): #method to check if the chain is valid
+        previous_block = chain[0] #initializing from 1st genesis block
+        block_index = 1 #initiallizing
+        while block_index < len(chain): #keep iterating while current index is still smaller than length of chain
+            block = chain[block_index] #getting the current block
+            if block['previous_hash'] != self.hash(previous_block): # comparing previous hash of current block and hash of previous block.  if not the same return false
+                return False 
             previous_proof = previous_block['proof']
             proof = block['proof']
             hash_operation = hashlib.sha256(str(proof**2 - previous_proof**2).encode()).hexdigest()
-            if hash_operation[:4] != '0000':
+            if hash_operation[:4] != '0000': # checking if hash operation has a valid proof of work.  done by comparing previous proof and current proof in operation equation
                 return False
             previous_block = block
             block_index += 1
         return True
     
-    def add_transaction(self, sender, receiver, amount):
-        self.transactions.append({'sender': sender,
+    def add_transaction(self, sender, receiver, amount): #method to add transaction into list prior to adding into block.  takes in sender, receiver and amount argument
+        self.transactions.append({'sender': sender, #append the arguments into the transaction list as a dictionary with 3 keys and values coming from argument
                                   'receiver': receiver,
                                   'amount': amount})
-        previous_block = self.get_previous_block()
-        return previous_block['index'] + 1
+        previous_block = self.get_previous_block() #getting previous block
+        return previous_block['index'] + 1 # returning a value of the next block index to be mined
     
-    def add_node(self, address):
-        parsed_url = urlparse(address)
-        self.nodes.add(parsed_url.netloc)
+    def add_node(self, address): #method to add nodes into the network
+        parsed_url = urlparse(address) #parses the address into different sections
+        self.nodes.add(parsed_url.netloc) #netloc gets only the address without the http
     
-    def replace_chain(self):
-        network = self.nodes
-        longest_chain = None
-        max_length = len(self.chain)
-        for node in network:
-            response = requests.get(f'http://{node}/get_chain')
+    def replace_chain(self): # replaces chain from the network if it is not the shortest
+        network = self.nodes #current network of nodes which is a set
+        longest_chain = None #initializing
+        max_length = len(self.chain) # checking the length of the current chain in the current blockcain
+        for node in network: #looping the nodes in the network and checking length of chain in each
+            response = requests.get(f'http://{node}/get_chain') # getting the address of the node and requesting check.  need to understand hand in hand together with get chain method in part 2
             if response.status_code == 200:
-                length = response.json()['length']
-                chain = response.json()['chain']
-                if length > max_length and self.is_chain_valid(chain):
-                    max_length = length
-                    longest_chain = chain
-        if longest_chain:
+                length = response.json()['length'] # taking the length json value from the json file
+                chain = response.json()['chain'] #taking the chain json value from the json file
+                if length > max_length and self.is_chain_valid(chain): # check if length of current chain is larger than current max length in node.  and if chain is valid.  if so update max length with current length and longest chain with current chain
+                    max_length = length #check if length of current chain is larger than current max length in node.  and if chain is valid.  if so update max length with current length and longest chain with current chain
+                    longest_chain = chain #check if length of current chain is larger than current max length in node.  and if chain is valid.  if so update max length with current length and longest chain with current chain
+        if longest_chain: # if longest chain has been update ie True, will need to update the chain in the current node with the longest chain
             self.chain = longest_chain
-            return True
+            return True #return true as end of method if chain has been updated
         return False
 
 # Part 2 - Mining our Blockchain
 
 # Creating a Web App
-app = Flask(__name__)
+app = Flask(__name__) # defining an app with the flask class
 
 # Creating an address for the node on Port 5000
-node_address = str(uuid4()).replace('-', '')
+node_address = str(uuid4()).replace('-', '') #defining an node address using the uuid4
 
 # Creating a Blockchain
-blockchain = Blockchain()
+blockchain = Blockchain() # defining a blockchain with the blockchain class
 
 # Mining a new block
-@app.route('/mine_block', methods = ['GET'])
-def mine_block():
-    previous_block = blockchain.get_previous_block()
-    previous_proof = previous_block['proof']
-    proof = blockchain.proof_of_work(previous_proof)
-    previous_hash = blockchain.hash(previous_block)
+@app.route('/mine_block', methods = ['GET']) #decorator used to define a mine block function with a get methods
+def mine_block(): #defining a mine block function which can be requested from postman
+    previous_block = blockchain.get_previous_block() # getting previous block
+    previous_proof = previous_block['proof'] # getting previous blocks proof
+    proof = blockchain.proof_of_work(previous_proof) # getting proof of work for the block to be created
+    previous_hash = blockchain.hash(previous_block) # hashing the previous block to be used as argument for the create block method
     blockchain.add_transaction(sender = node_address, receiver = 'Hadelin', amount = 1)
     block = blockchain.create_block(proof, previous_hash)
     response = {'message': 'Congratulations, you just mined a block!',
