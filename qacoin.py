@@ -49,7 +49,7 @@ class Blockchain: # this is creating the blockchain class.  a class can be used 
         return new_proof # returns new proof as proof of work
     
     def hash(self, block): #hash method which returns the sha256 hash of the argument block
-        encoded_block = json.dumps(block, sort_keys = True).encode()
+        encoded_block = json.dumps(block, sort_keys = True).encode() #json.dumps converts a python dictionary to a json string
         return hashlib.sha256(encoded_block).hexdigest() #returns the sha256 hash of the argument block
     
     def is_chain_valid(self, chain): #method to check if the chain is valid
