@@ -16,22 +16,22 @@ from urllib.parse import urlparse #this parses the full address to only get the 
 
 # Part 1 - Building a Blockchain
 
-class Blockchain:
+class Blockchain: # this is creating the blockchain class.  a class can be used as soon as it is defined.
 
-    def __init__(self):
-        self.chain = []
-        self.transactions = []
-        self.create_block(proof = 1, previous_hash = '0')
-        self.nodes = set()
+    def __init__(self): #__init__ is defined so that the instance automatically has the attributes of the class when an instance is created
+        self.chain = [] # creating a list of the chain.  mined blocks will be stored in this list
+        self.transactions = [] # creating a list of transactions which will be stored before mined into the blockchain
+        self.create_block(proof = 1, previous_hash = '0') # when a Blockchain class is created, it will create a block by default.  this will be the genesis block with arbitrary proof of 1 and previous hash 0
+        self.nodes = set() # creating a node variable which is an empty set which will be used to store the addresses of the nodes in the network
     
-    def create_block(self, proof, previous_hash):
-        block = {'index': len(self.chain) + 1,
-                 'timestamp': str(datetime.datetime.now()),
-                 'proof': proof,
-                 'previous_hash': previous_hash,
-                 'transactions': self.transactions}
-        self.transactions = []
-        self.chain.append(block)
+    def create_block(self, proof, previous_hash): # this creates a create block method which requires argument of proof and previous hash 
+        block = {'index': len(self.chain) + 1, #block variable is a dictionary with various keys and values.  len(self.chain) gives length of the current chain which provides value for index
+                 'timestamp': str(datetime.datetime.now()), #datetime library has now method which gives timestamp for the actual time when block was mined
+                 'proof': proof, #coming from argument value
+                 'previous_hash': previous_hash, # coming from argument value
+                 'transactions': self.transactions} #transaction key will take in the current list in the self.transaction attribute
+        self.transactions = [] #once block is mined, all transactions are stored in the block hence all current transactions in list will need to be emptied
+        self.chain.append(block) # block variable created will be appended to the chain list.
         return block
 
     def get_previous_block(self):
