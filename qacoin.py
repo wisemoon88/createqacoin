@@ -34,14 +34,14 @@ class Blockchain: # this is creating the blockchain class.  a class can be used 
         self.chain.append(block) # block variable created will be appended to the chain list.
         return block
 
-    def get_previous_block(self):
+    def get_previous_block(self): #method to get the previous block which returns the block of the previous chain in the list
         return self.chain[-1]
 
-    def proof_of_work(self, previous_proof):
-        new_proof = 1
-        check_proof = False
-        while check_proof is False:
-            hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
+    def proof_of_work(self, previous_proof): #method to perform proof of work which needs to solve a formula prior to approval for creating block
+        new_proof = 1 #initialize
+        check_proof = False #initialize
+        while check_proof is False: # while loop to keep iterating while proof is not satisfied
+            hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest() #sha256 is method in hashlib library to perform sha256 encryption on the equation used as proof of work.encode adds a 'b' and hexdigest converts the value to hexadecimal
             if hash_operation[:4] == '0000':
                 check_proof = True
             else:
