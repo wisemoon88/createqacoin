@@ -114,64 +114,64 @@ def mine_block(): #defining a mine block function which can be requested from po
     previous_proof = previous_block['proof'] # getting previous blocks proof
     proof = blockchain.proof_of_work(previous_proof) # getting proof of work for the block to be created
     previous_hash = blockchain.hash(previous_block) # hashing the previous block to be used as argument for the create block method
-    blockchain.add_transaction(sender = node_address, receiver = 'Hadelin', amount = 1)
-    block = blockchain.create_block(proof, previous_hash)
-    response = {'message': 'Congratulations, you just mined a block!',
+    blockchain.add_transaction(sender = node_address, receiver = 'Hadelin', amount = 1) #adding aditional transaction to block since node has succesfully mined
+    block = blockchain.create_block(proof, previous_hash) #creating a new block 
+    response = {'message': 'Congratulations, you just mined a block!', #getting response to show as a result of get method when running mine_block function
                 'index': block['index'],
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
                 'previous_hash': block['previous_hash'],
                 'transactions': block['transactions']}
-    return jsonify(response), 200
+    return jsonify(response), 200 #returns a jsonify of the response and a success code
 
 # Getting the full Blockchain
-@app.route('/get_chain', methods = ['GET'])
-def get_chain():
-    response = {'chain': blockchain.chain,
+@app.route('/get_chain', methods = ['GET']) #decorator used to create a get_chain function using get method
+def get_chain(): #defining get_chain
+    response = {'chain': blockchain.chain, #getting response which is the chain itself and the length of the chain
                 'length': len(blockchain.chain)}
-    return jsonify(response), 200
+    return jsonify(response), 200 #returning a jsonify of the response with a success code
 
 # Checking if the Blockchain is valid
-@app.route('/is_valid', methods = ['GET'])
+@app.route('/is_valid', methods = ['GET']) #decorator used to create is_valid function
 def is_valid():
-    is_valid = blockchain.is_chain_valid(blockchain.chain)
+    is_valid = blockchain.is_chain_valid(blockchain.chain) # checking validity of chain by using is_chain_valid method from blockchain class
     if is_valid:
-        response = {'message': 'All good. The Blockchain is valid.'}
+        response = {'message': 'All good. The Blockchain is valid.'} #create response if true
     else:
         response = {'message': 'Houston, we have a problem. The Blockchain is not valid.'}
-    return jsonify(response), 200
+    return jsonify(response), 200 #returns jsonify of response and success code
 
 # Adding a new transaction to the Blockchain
-@app.route('/add_transaction', methods = ['POST'])
-def add_transaction():
-    json = request.get_json()
+@app.route('/add_transaction', methods = ['POST']) #decorator creating a add transaction function with a post method
+def add_transaction(): #defining function
+    json = request.get_json() #getting the json string from the post method.  Parses the incoming JSON request data and returns it.  convert json file to python dictionary?
     transaction_keys = ['sender', 'receiver', 'amount']
-    if not all(key in json for key in transaction_keys):
+    if not all(key in json for key in transaction_keys): #check to see if all the keys are in the json variable
         return 'Some elements of the transaction are missing', 400
-    index = blockchain.add_transaction(json['sender'], json['receiver'], json['amount'])
-    response = {'message': f'This transaction will be added to Block {index}'}
-    return jsonify(response), 201
+    index = blockchain.add_transaction(json['sender'], json['receiver'], json['amount']) #running the add transaction method which requires 3 arguments that is taken from the json variable.
+    response = {'message': f'This transaction will be added to Block {index}'} #returning a response  which will be jsonified.
+    return jsonify(response), 201 #returns jsonify response with success code
 
 # Part 3 - Decentralizing our Blockchain
 
 # Connecting new nodes
-@app.route('/connect_node', methods = ['POST'])
+@app.route('/connect_node', methods = ['POST']) #decorator for connecting nodes with a post method.
 def connect_node():
-    json = request.get_json()
-    nodes = json.get('nodes')
-    if nodes is None:
+    json = request.get_json() #getting the json string from the post method.  Parses the incoming JSON request data and returns it.  convert json file to python dictionary?
+    nodes = json.get('nodes'). #getting the nodes value to be inserted in nodes
+    if nodes is None: # if there is no node address in body of post method
         return "No node", 400
-    for node in nodes:
+    for node in nodes: #add each node in the body of the post into the set attribute
         blockchain.add_node(node)
     response = {'message': 'All the nodes are now connected. The Hadcoin Blockchain now contains the following nodes:',
-                'total_nodes': list(blockchain.nodes)}
-    return jsonify(response), 201
+                'total_nodes': list(blockchain.nodes)} #response to be jsonify, provide list of nodes which is converted from set
+    return jsonify(response), 201 # return jsonify with success code
 
 # Replacing the chain by the longest chain if needed
-@app.route('/replace_chain', methods = ['GET'])
+@app.route('/replace_chain', methods = ['GET']) # decorator to replace chain with the get method
 def replace_chain():
-    is_chain_replaced = blockchain.replace_chain()
-    if is_chain_replaced:
+    is_chain_replaced = blockchain.replace_chain() #replace chain returns true or false into variable
+    if is_chain_replaced: #depends on true or false, return respective response and jsonify
         response = {'message': 'The nodes had different chains so the chain was replaced by the longest one.',
                     'new_chain': blockchain.chain}
     else:
@@ -180,4 +180,4 @@ def replace_chain():
     return jsonify(response), 200
 
 # Running the app
-app.run(host = '0.0.0.0', port = 5000)
+app.run(host = '0.0.0.0', port = 5000) # running app on the port 500
